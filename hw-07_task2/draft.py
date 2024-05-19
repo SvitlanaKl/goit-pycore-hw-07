@@ -142,3 +142,92 @@ if __name__ == '__main__':
     print("Upcoming birthdays:")
     for birthday in upcoming_birthdays:
         print(birthday)
+# Декоратор обробки помилок
+def input_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValueError:
+            return "error"
+         
+    return inner
+
+@input_error
+def add_birthday(args, book: AddressBook):
+    name, birthday_str, *_ = args
+    record = book.find(name)
+    if record:
+        record.add_birthday(birthday_str)
+        return f"Birthday added for {name}."
+    else:
+        return f"No contact found with name '{name}'."
+
+@input_error
+def show_birthday(args, book: AddressBook):
+    name, *_ = args
+    record = book.find(name)
+    if record and record.birthday:
+        return f"{name}'s birthday: {record.birthday.value.strftime('%d.%m.%Y')}"
+    else:
+        return f"No birthday found for {name}."
+
+@input_error
+def birthdays(args, book: AddressBook):
+    upcoming_birthdays = book.get_upcoming_birthdays()
+    if upcoming_birthdays:
+        return "\n".join(f"{birthday['name']}'s birthday on {birthday['congratulation_date']}" for birthday in upcoming_birthdays)
+    else:
+        return "No upcoming birthdays in the next week."
+
+
+@input_error
+def add_contact(args, book: AddressBook):
+    name, phone, *_ = args
+    record = book.find(name)
+    message = "Contact updated."
+    if record is None:
+        record = Record(name)
+        book.add_record(record)
+        message = "Contact added."
+    if phone:
+        record.add_phone(phone)
+    return message    
+
+
+def main():
+    book = AddressBook()
+    print("Welcome to the assistant bot!")
+    while True:
+        user_input = input("Enter a command: ")
+        command, *args = parse_input(user_input)
+
+        if command in ["close", "exit"]:
+            print("Good bye!")
+            break
+
+        elif command == "hello":
+            print("How can I help you?")
+
+        elif command == "add":
+            # реалізація
+
+        elif command == "change":
+            # реалізація
+
+        elif command == "phone":
+            # реалізація
+
+        elif command == "all":
+            # реалізація
+
+        elif command == "add-birthday":
+            print(add_birthday(args, book))
+
+        elif command == "show-birthday":
+            print(show_birthday(args, book))
+
+        elif command == "birthdays":
+            print(birthdays(args, book))
+
+        else:
+            print("Invalid command.")
