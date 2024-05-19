@@ -29,6 +29,9 @@ class Birthday(Field):
         except ValueError:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
         super().__init__(self.value)
+    def __str__(self):
+        birthday = self.value.strftime("%d.%m.%Y")
+        return birthday
 
 class Record:
     def __init__(self, name):
@@ -58,7 +61,7 @@ class Record:
    
     def __str__(self):
         phones = '; '.join(number.value for number in self.phones)
-        birthday = self.birthday.value.strftime("%d.%m.%Y") if self.birthday else "No birthday set"
+        birthday = self.birthday if self.birthday else "No birthday set"
         return f"Contact name: {self.name.value}, phones: {phones}, birthday: {birthday}"
 
 class AddressBook(UserDict):
@@ -83,10 +86,13 @@ class AddressBook(UserDict):
         for record in self.data.values():
             if record.birthday:
                 birthdate = record.birthday.value.date()
+                birthdate = birthdate.replace(year=today.year)
                 # якщо в цьому році вже минув день народження, змінити в даті рік на наступний
                 if birthdate < today:  
                     birthdate = birthdate.replace(year=today.year + 1)
+                    print(birthdate)
                 days_to_birthday = (birthdate - today).days
+                print(days_to_birthday)
                 # якщо день народження потрапляє на вихідні, перенести привітання на наступний тиждень
                 if days_to_birthday <= 7:
                     if birthdate.weekday() == 5:
@@ -106,6 +112,7 @@ if __name__ == '__main__':
     john_record = Record("John")
     john_record.add_phone("1234567890")
     john_record.add_phone("5555555555")
+    john_record.add_birthday("22.04.1980")
 
     # Додавання запису John до адресної книги
     book.add_record(john_record)
@@ -113,8 +120,9 @@ if __name__ == '__main__':
     # Створення та додавання нового запису для Jane
     jane_record = Record("Jane")
     jane_record.add_phone("9876543210")
+    jane_record.add_birthday("25.05.1990")
     book.add_record(jane_record)
-
+    
     # Виведення всіх записів у книзі
     for name, record in book.data.items():
         print(record)
@@ -130,14 +138,8 @@ if __name__ == '__main__':
     print(f"{john.name}: {found_phone}")  # Виведення: 5555555555
 
     # Видалення запису Jane
-    book.delete("Jane")
+    # book.delete("Jane")
 
-    # Видалення запису Jane
-    users = [
-    {"name": "John", "birthday": "25.05.1985"},
-    {"name": "Jane", "birthday": "22.05.1990"}
-    ]
-    
     upcoming_birthdays = book.get_upcoming_birthdays()
     print("Upcoming birthdays:")
     for birthday in upcoming_birthdays:
